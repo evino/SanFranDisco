@@ -1,0 +1,34 @@
+{
+    "series": {
+        "additional_prohibitions": [
+            "Persons who are employed by any of the Source Agencies are not permitted to trade on the Contract.",
+            "Persons who hold any material, non-public information on the Underlying are not permitted to trade on the Contract."
+        ],
+        "category": "Climate and Weather",
+        "contract_terms_url": "https://kalshi-public-docs.s3.amazonaws.com/contract_terms/GLOBALTEMPERATURE.pdf",
+        "contract_url": "https://kalshi-public-docs.s3.us-east-1.amazonaws.com/regulatory/product-certifications/GLOBALTEMPERATURE.pdf",
+        "fee_multiplier": 1,
+        "fee_type": "quadratic",
+        "frequency": "daily",
+        "last_updated_ts": "2026-02-26T08:50:31.901806Z",
+        "product_metadata": {
+            "important_info": null
+        },
+        "settlement_sources": [
+            {
+                "name": "National Weather Service",
+                "url": "https://www.weather.gov"
+            },
+            {
+                "name": "the national weather service for area (e.g. Australian Bureau of Meteorology, the Met Office, etc.)",
+                "url": "https://kalshi.com"
+            }
+        ],
+        "tags": [
+            "Daily temperature",
+            "High temp"
+        ],
+        "ticker": "KXHIGHTSFO",
+        "title": "San Francisco High Temperature Daily"
+    }
+}
