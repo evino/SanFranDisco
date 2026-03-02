@@ -34,8 +34,8 @@ def main():
     start = datetime.combine(tomorrow, time.min, tzinfo=tz).isoformat()
     end = datetime.combine(tomorrow + timedelta(days=1), time.min, tzinfo=tz).isoformat()
     print(start)
-    # print(start.isoformat())
     print(end)
+
     # DateFilter()
 
 if __name__ == "__main__":
