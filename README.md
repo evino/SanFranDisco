@@ -2,7 +2,7 @@
 Bot to predict highest temp in SFO
 
 # TODO:
-1. ~~Filter temps for next days~~~
+1. ~~Filter temps for next days~~
 2. Now that we have highest temp for next day, we need to check how
 often that temperature is hit when reported via NWS
 3. Pull from a few other weather sources and potentially check probability for them
