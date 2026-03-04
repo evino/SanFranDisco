@@ -5,8 +5,6 @@ from datetime import datetime, timezone, timedelta, time
 
 
 noaa_url = "https://api.weather.gov/gridpoints/MTR/85,98/forecast/hourly"
-tz = timezone(timedelta(hours=-8))
-dt = datetime.now(tz)
 
 
 # Get NWS metadata
@@ -53,16 +51,8 @@ def main():
     startPeriod = HoursLeftInDay()
     GetTemps(noaa_data, startPeriod)
 
-    now = dt  # Current date
-    tomorrow = now.date() + timedelta(days=1)
-    start = datetime.combine(tomorrow, time.min, tzinfo=tz).isoformat()
-    end = datetime.combine(tomorrow + timedelta(days=1), time.min, tzinfo=tz).isoformat()
-    
-        
-    # print(start)
-    # print(end)
 
-    # DateFilter()
+
 
 if __name__ == "__main__":
     main()
