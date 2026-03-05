@@ -1,29 +1,29 @@
 import sqlite3
+from collections import Counter
 
 from db import DB_PATH, get_forecast_actuals
 
 
-def probability_reached(forecast_actuals: list[tuple[float, float]], threshold: float) -> dict:
+def build_distribution(forecast_actuals: list[tuple[float, float]]) -> dict:
     """
-    Given (forecast_high, actual_high) pairs and a threshold temp,
-    return P(actual >= threshold).
+    Given (forecast_high, actual_high) pairs, return a distribution of actual outcomes.
     """
     if not forecast_actuals:
-        return {"threshold": threshold, "samples": 0, "probability": None}
+        return {"samples": 0, "distribution": {}}
 
-    reached = sum(1 for _, actual in forecast_actuals if actual == threshold)
-    return {
-        "threshold": threshold,
-        "samples": len(forecast_actuals),
-        "probability": round(reached / len(forecast_actuals), 3),
-    }
+    actuals = [round(actual) for _, actual in forecast_actuals]
+    counts = Counter(actuals)
+    n = len(actuals)
+    distribution = {temp: round(count / n, 4) for temp, count in sorted(counts.items())}
+
+    return {"samples": n, "distribution": distribution}
 
 
 def get_probability(predicted_temp: float, days_ahead: int = 1) -> dict:
     """
     Open the DB, fetch historical forecast/actual pairs where GFS forecast
-    exactly matched predicted_temp, and return P(actual >= predicted_temp).
+    exactly matched predicted_temp, and return a distribution of actual outcomes.
     """
     with sqlite3.connect(DB_PATH) as conn:
         pairs = get_forecast_actuals(conn, predicted_temp, days_ahead)
-    return probability_reached(pairs, predicted_temp)
+    return build_distribution(pairs)

@@ -38,7 +38,7 @@ def GetTemps(WeatherData, startPeriod=0) -> float:
     # for p in periods:
     #     print(p["temperature"])
 
-    print(f"High temp tomorrow ({periods[0]["startTime"]}) is: {high_temp}")
+    print(f"NWS-predicted high temp tomorrow ({periods[0]["startTime"]}) is: {high_temp}")
     # print(json.dumps(periods[0]["temperature"], indent=4))
 
     return high_temp
@@ -52,10 +52,12 @@ def main():
     predicted = GetTemps(noaa_data, startPeriod)
 
     result = get_probability(predicted)
-    if result["probability"] is None:
+    if not result["samples"]:
         print("Not enough historical data for this temperature range.")
     else:
-        print(f"P(actual == {predicted}°F) = {result['probability']:.1%}  ({result['samples']} historical samples)")
+        print(f"Actual outcome distribution when GFS forecast {predicted}°F ({result['samples']} samples):")
+        for temp, prob in result["distribution"].items():
+            print(f"  {temp}°F: {prob:.1%}")
 
 
 

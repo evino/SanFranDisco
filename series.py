@@ -9,4 +9,7 @@ url = f"https://api.elections.kalshi.com/trade-api/v2/events/KXHIGHTSFO-{date_st
 response = requests.get(url)
 series_data = response.json()
 
+# def GetBrackets():
+#     seriesData = requests.get(url)
+
 print(json.dumps(series_data, indent=4))
