@@ -19,7 +19,7 @@ def build_distribution(forecast_actuals: list[tuple[float, float]]) -> dict:
     return {"samples": n, "distribution": distribution}
 
 
-def get_probability(predicted_temp: float, days_ahead: int = 1) -> dict:
+def GetTempProbability(predicted_temp: float, days_ahead: int = 1) -> dict:
     """
     Open the DB, fetch historical forecast/actual pairs where GFS forecast
     exactly matched predicted_temp, and return a distribution of actual outcomes.
@@ -27,3 +27,8 @@ def get_probability(predicted_temp: float, days_ahead: int = 1) -> dict:
     with sqlite3.connect(DB_PATH) as conn:
         pairs = get_forecast_actuals(conn, predicted_temp, days_ahead)
     return build_distribution(pairs)
+
+# Return probability of each bracket
+def GetBracketProbability(brackets: list) -> dict:
+    for bracket in brackets:
+        print(bracket)
