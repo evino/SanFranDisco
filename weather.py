@@ -40,13 +40,13 @@ def GetHighTemp(WeatherData, startPeriod=0) -> int:
 
 
 def main():
-    from probability import get_probability
+    from probability import GetTempProbability
 
     noaa_data = GetWeatherData(noaa_url)
     startPeriod = HoursLeftInDay()
     predicted = GetHighTemp(noaa_data, startPeriod)
 
-    result = get_probability(predicted)
+    result = GetTempProbability(predicted)
     if not result["samples"]:
         print("Not enough historical data for this temperature range.")
     else:
