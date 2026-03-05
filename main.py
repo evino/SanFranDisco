@@ -2,7 +2,7 @@
 
 from series import GetBrackets
 from weather import GetWeatherData, GetHighTemp, HoursLeftInDay
-from probability import get_probability
+from probability import GetTempProbability, GetBracketProbability
 
 def main():
     print(GetBrackets())
@@ -14,13 +14,17 @@ def main():
 
     print(f"NWS-predicted high temp tomorrow is: {predictedHighTemp}")
 
-    probabilities = get_probability(predictedHighTemp)
+    probabilities = GetTempProbability(predictedHighTemp)
     if not probabilities["samples"]:
         print("Not enough historical data for this temperature range.")
     else:
         print(f"Actual outcome distribution when GFS forecast {predictedHighTemp}°F ({probabilities['samples']} samples):")
         for temp, prob in probabilities["distribution"].items():
             print(f"  {temp}°F: {prob:.1%}")
+
+    GetBracketProbability(GetBrackets())
+
+
 
 if __name__ == "__main__":
     main()
