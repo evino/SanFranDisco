@@ -101,6 +101,24 @@ def upsert_forecasts(conn: sqlite3.Connection, rows: list[tuple[str, str, float]
     conn.commit()
 
 
+def get_forecast_actuals(
+    conn: sqlite3.Connection,
+    predicted_temp: float,
+    days_ahead: int = 1,
+) -> list[tuple[float, float]]:
+    """
+    Return (forecast_high, actual_high) pairs from history where the GFS forecast
+    exactly matched `predicted_temp` and was made `days_ahead` days in advance.
+    """
+    return conn.execute("""
+        SELECT f.high_temp_f, h.high_temp_f
+        FROM forecasts f
+        JOIN high_temps h ON f.forecast_date = h.date
+        WHERE f.high_temp_f = ?
+          AND CAST(julianday(f.forecast_date) - julianday(date(f.runtime)) AS INTEGER) = ?
+    """, (predicted_temp, days_ahead)).fetchall()
+
+
 def main():
     print("Fetching observed temperature data...")
     daily_highs = fetch_daily_highs(build_url())

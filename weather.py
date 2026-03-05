@@ -45,11 +45,17 @@ def GetTemps(WeatherData, startPeriod=0) -> float:
 
 
 def main():
-    noaa_data = GetWeatherData(noaa_url)
-    # print(json.dumps(noaa_data, indent=4))
+    from probability import get_probability
 
+    noaa_data = GetWeatherData(noaa_url)
     startPeriod = HoursLeftInDay()
-    GetTemps(noaa_data, startPeriod)
+    predicted = GetTemps(noaa_data, startPeriod)
+
+    result = get_probability(predicted)
+    if result["probability"] is None:
+        print("Not enough historical data for this temperature range.")
+    else:
+        print(f"P(actual == {predicted}°F) = {result['probability']:.1%}  ({result['samples']} historical samples)")
 
 
 

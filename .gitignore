@@ -1,3 +1,5 @@
 .SanFranDisco/
 .env/
 data/
+*.json
+__pycache__/
