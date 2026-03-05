@@ -5,14 +5,12 @@ from weather import GetWeatherData, GetHighTemp, HoursLeftInDay
 from probability import GetTempProbability, GetBracketProbability
 
 def main():
-    print(GetBrackets())
-
     noaa_url = "https://api.weather.gov/gridpoints/MTR/85,98/forecast/hourly"
     startPeriod = HoursLeftInDay()
     noaa_data = GetWeatherData(noaa_url)
     predictedHighTemp = GetHighTemp(noaa_data, startPeriod)
 
-    print(f"NWS-predicted high temp tomorrow is: {predictedHighTemp}")
+    print(f"NWS-predicted high temp tomorrow is: {predictedHighTemp}\n")
 
     probabilities = GetTempProbability(predictedHighTemp)
     if not probabilities["samples"]:
@@ -22,7 +20,11 @@ def main():
         for temp, prob in probabilities["distribution"].items():
             print(f"  {temp}°F: {prob:.1%}")
 
-    GetBracketProbability(GetBrackets())
+    print(f"\nTomorrows brackets: {GetBrackets()}")
+    bracket_probs = GetBracketProbability(predictedHighTemp, GetBrackets())
+    print(f"Bracket probabilities ({bracket_probs['samples']} samples):")
+    for label, prob in bracket_probs["distribution"].items():
+        print(f"  {label}°F: {prob:.1%}")
 
 
 

@@ -29,6 +29,22 @@ def GetTempProbability(predicted_temp: float, days_ahead: int = 1) -> dict:
     return build_distribution(pairs)
 
 # Return probability of each bracket
-def GetBracketProbability(brackets: list) -> dict:
+def GetBracketProbability(predicted_temp: float, brackets: list, days_ahead: int = 1) -> dict:
+    result = GetTempProbability(predicted_temp, days_ahead)
+    distribution = result["distribution"]
+
+    bucketed = {}
     for bracket in brackets:
-        print(bracket)
+        if bracket[0] == '<':
+            label = f"< {bracket[1]}"
+            prob = sum(p for temp, p in distribution.items() if temp < bracket[1])
+        elif bracket[0] == '>':
+            label = f"> {bracket[1]}"
+            prob = sum(p for temp, p in distribution.items() if temp > bracket[1])
+        else:
+            low, high = bracket
+            label = f"{low}-{high}"
+            prob = sum(p for temp, p in distribution.items() if low <= temp <= high)
+        bucketed[label] = round(prob, 4)
+
+    return {"samples": result["samples"], "distribution": bucketed}
