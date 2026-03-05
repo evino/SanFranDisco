@@ -28,6 +28,7 @@ def GetBrackets():
 def main():
     # print(json.dumps(series_data, indent=4))
     print(GetBrackets())
+    
 
 if __name__ == "__main__":
     main()

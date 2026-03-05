@@ -24,22 +24,17 @@ def HoursLeftInDay(dt=None):
 """
 Returns highest temperature for a 24-hour window based off a start period
 """
-def GetTemps(WeatherData, startPeriod=0) -> float:
+def GetHighTemp(WeatherData, startPeriod=0) -> int:
     startPeriod += 1
     endPeriod = startPeriod + 24
 
     # Grab each period for 24 hour window based off startPeriod
     periods = WeatherData["properties"]["periods"][startPeriod:endPeriod]
-    high_temp = max(float(p["temperature"]) for p in periods)
+    high_temp = max(int(p["temperature"]) for p in periods)
 
 
-    # For debug
-    # print(json.dumps(periods, indent=4))
-    # for p in periods:
-    #     print(p["temperature"])
-
-    print(f"NWS-predicted high temp tomorrow ({periods[0]["startTime"]}) is: {high_temp}")
-    # print(json.dumps(periods[0]["temperature"], indent=4))
+    # For Debug
+    #print(f"NWS-predicted high temp tomorrow ({periods[0]["startTime"]}) is: {high_temp}")
 
     return high_temp
 
@@ -49,7 +44,7 @@ def main():
 
     noaa_data = GetWeatherData(noaa_url)
     startPeriod = HoursLeftInDay()
-    predicted = GetTemps(noaa_data, startPeriod)
+    predicted = GetHighTemp(noaa_data, startPeriod)
 
     result = get_probability(predicted)
     if not result["samples"]:
