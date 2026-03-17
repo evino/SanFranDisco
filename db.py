@@ -10,7 +10,7 @@ DB_PATH = "data/high_temps.db"
 
 def build_url() -> str:
     today = date.today()
-    start = today - timedelta(days=365 * 2)
+    start = today - timedelta(days=365 * 5)
     return (
         "https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py"
         f"?station=SFO&data=tmpf"
@@ -116,6 +116,7 @@ def get_forecast_actuals(
         JOIN high_temps h ON f.forecast_date = h.date
         WHERE f.high_temp_f = ?
           AND CAST(julianday(f.forecast_date) - julianday(date(f.runtime)) AS INTEGER) = ?
+          AND strftime('%m', f.forecast_date) = strftime('%m', 'now')
     """, (predicted_temp, days_ahead)).fetchall()
 
 

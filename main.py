@@ -4,6 +4,9 @@ from series import GetBrackets
 from weather import GetWeatherData, GetHighTemp, HoursLeftInDay
 from probability import GetTempProbability, GetBracketProbability
 
+
+CHECK_BRACKETS = False
+
 def main():
     noaa_url = "https://api.weather.gov/gridpoints/MTR/85,98/forecast/hourly"
     startPeriod = HoursLeftInDay()
@@ -19,6 +22,9 @@ def main():
         print(f"Actual outcome distribution when GFS forecast {predictedHighTemp}°F ({probabilities['samples']} samples):")
         for temp, prob in probabilities["distribution"].items():
             print(f"  {temp}°F: {prob:.1%}")
+
+    if not CHECK_BRACKETS:
+        return
 
     print(f"\nTomorrows brackets: {GetBrackets()}")
     bracket_probs = GetBracketProbability(predictedHighTemp, GetBrackets())
