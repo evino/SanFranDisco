@@ -43,6 +43,7 @@ def main():
     from probability import GetTempProbability
 
     noaa_data = GetWeatherData(noaa_url)
+    print(json.dumps(noaa_data, indent=4))
     startPeriod = HoursLeftInDay()
     predicted = GetHighTemp(noaa_data, startPeriod)
 

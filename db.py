@@ -39,7 +39,7 @@ def fetch_daily_highs(url: str) -> dict[str, float]:
 
 def build_forecast_url() -> str:
     today = date.today()
-    start = today - timedelta(days=365 * 2)
+    start = today - timedelta(days=365 * 5)
     return (
         "https://mesonet.agron.iastate.edu/cgi-bin/request/mos.py"
         f"?station=KSFO&model=GFS"
@@ -67,6 +67,9 @@ def fetch_forecast_highs(url: str) -> list[tuple[str, str, float]]:
     return [(rt, fd, max(temps)) for (rt, fd), temps in groups.items()]
 
 
+WINDOW_DAYS = 45
+
+
 def init_db(conn: sqlite3.Connection) -> None:
     conn.execute("""
         CREATE TABLE IF NOT EXISTS high_temps (
@@ -79,9 +82,11 @@ def init_db(conn: sqlite3.Connection) -> None:
             runtime TEXT NOT NULL,
             forecast_date TEXT NOT NULL,
             high_temp_f REAL NOT NULL,
+            day_of_year INTEGER NOT NULL,
             PRIMARY KEY (runtime, forecast_date)
         )
     """)
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_forecasts_doy ON forecasts (day_of_year)")
     conn.commit()
 
 
@@ -95,8 +100,8 @@ def upsert_highs(conn: sqlite3.Connection, daily_highs: dict[str, float]) -> Non
 
 def upsert_forecasts(conn: sqlite3.Connection, rows: list[tuple[str, str, float]]) -> None:
     conn.executemany(
-        "INSERT OR REPLACE INTO forecasts (runtime, forecast_date, high_temp_f) VALUES (?, ?, ?)",
-        rows,
+        "INSERT OR REPLACE INTO forecasts (runtime, forecast_date, high_temp_f, day_of_year) VALUES (?, ?, ?, ?)",
+        [(rt, fd, temp, date.fromisoformat(fd).timetuple().tm_yday) for rt, fd, temp in rows],
     )
     conn.commit()
 
@@ -108,16 +113,30 @@ def get_forecast_actuals(
 ) -> list[tuple[float, float]]:
     """
     Return (forecast_high, actual_high) pairs from history where the GFS forecast
-    exactly matched `predicted_temp` and was made `days_ahead` days in advance.
+    exactly matched `predicted_temp` and was made `days_ahead` days in advance,
+    filtered to a ±WINDOW_DAYS rolling window around today's day of year.
     """
-    return conn.execute("""
+    today_doy = date.today().timetuple().tm_yday
+    low, high = today_doy - WINDOW_DAYS, today_doy + WINDOW_DAYS
+    # Handle year wraparound
+    if low < 1:
+        doy_filter = "f.day_of_year >= ? OR f.day_of_year <= ?"
+        params = (predicted_temp, days_ahead, low + 365, high)
+    elif high > 365:
+        doy_filter = "f.day_of_year >= ? OR f.day_of_year <= ?"
+        params = (predicted_temp, days_ahead, low, high - 365)
+    else:
+        doy_filter = "f.day_of_year BETWEEN ? AND ?"
+        params = (predicted_temp, days_ahead, low, high)
+
+    return conn.execute(f"""
         SELECT f.high_temp_f, h.high_temp_f
         FROM forecasts f
         JOIN high_temps h ON f.forecast_date = h.date
         WHERE f.high_temp_f = ?
           AND CAST(julianday(f.forecast_date) - julianday(date(f.runtime)) AS INTEGER) = ?
-          AND strftime('%m', f.forecast_date) = strftime('%m', 'now')
-    """, (predicted_temp, days_ahead)).fetchall()
+          AND {doy_filter}
+    """, params).fetchall()
 
 
 def main():
