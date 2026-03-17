@@ -1,7 +1,9 @@
 import requests
 import json
+import csv
+import io
 
-from datetime import datetime, timezone, timedelta, time
+from datetime import datetime, timezone, timedelta, time, date
 
 
 noaa_url = "https://api.weather.gov/gridpoints/MTR/85,98/forecast/hourly"
@@ -37,6 +39,38 @@ def GetHighTemp(WeatherData, startPeriod=0) -> int:
     #print(f"NWS-predicted high temp tomorrow ({periods[0]["startTime"]}) is: {high_temp}")
 
     return high_temp
+
+
+def GetGFSMOSHigh(days_ahead: int = 1) -> float | None:
+    """
+    Fetch the latest GFS MOS n_x (daily high) for KSFO `days_ahead` days from today.
+    Returns the high temp in °F, or None if unavailable.
+    """
+    today = date.today()
+    target = today + timedelta(days=days_ahead)
+    target_str = target.strftime("%Y-%m-%d")
+
+    url = (
+        "https://mesonet.agron.iastate.edu/cgi-bin/request/mos.py"
+        f"?station=KSFO&model=GFS"
+        f"&year1={today.year}&month1={today.month}&day1={today.day}&hour1=0"
+        f"&year2={today.year}&month2={today.month}&day2={today.day}&hour2=23"
+    )
+    response = requests.get(url)
+    response.raise_for_status()
+
+    # Find the most recent runtime's n_x for the target date midnight row
+    best_runtime, best_high = None, None
+    reader = csv.DictReader(io.StringIO(response.text))
+    for row in reader:
+        if not row["n_x"].strip() or row["ftime"].strip()[:10] != target_str:
+            continue
+        runtime = row["runtime"].strip()
+        n_x = float(row["n_x"].strip())
+        if best_runtime is None or runtime > best_runtime:
+            best_runtime, best_high = runtime, n_x
+
+    return best_high
 
 
 def main():
